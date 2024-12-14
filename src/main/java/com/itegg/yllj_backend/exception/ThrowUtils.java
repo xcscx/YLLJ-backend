@@ -22,7 +22,7 @@ public class ThrowUtils {
      * @param condition 判断依据
      * @param errorCode 错误码
      */
-    public static void throwId(boolean condition, ErrorCode errorCode) {
+    public static void throwIf(boolean condition, ErrorCode errorCode) {
         throwIf(condition, new BusinessException(errorCode));
     }
 
@@ -32,7 +32,7 @@ public class ThrowUtils {
      * @param errorCode 错误码
      * @param message 自定义消息
      */
-    public static void throwId(boolean condition, ErrorCode errorCode, String message) {
+    public static void throwIf(boolean condition, ErrorCode errorCode, String message) {
         throwIf(condition, new BusinessException(errorCode, message));
     }
 

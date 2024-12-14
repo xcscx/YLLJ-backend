@@ -8,7 +8,7 @@ import lombok.Data;
 
 /**
  * 用户表
- * @TableName user
+ * TableName: user
  */
 @TableName(value ="user")
 @Data
