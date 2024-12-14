@@ -1,4 +1,22 @@
 package com.itegg.yllj_backend.model.dto.user;
 
-public class UserLoginRequest {
+import lombok.Data;
+
+import java.io.Serializable;
+
+@Data
+public class UserLoginRequest implements Serializable {
+
+    private static final long serialVersionUID = 6547841231584616L;
+
+    /**
+     * 账号
+     */
+    private String userAccount;
+
+    /**
+     * 密码
+     */
+    private String userPassword;
+
 }

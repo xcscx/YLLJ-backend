@@ -18,9 +18,9 @@ create table if not exists user
     editTime 			datetime  default CURRENT_TIMESTAMP  not null comment '最后编辑时间',
     createTime  	datetime  default CURRENT_TIMESTAMP  not null comment '创建时间',
     updateTime    datetime  default CURRENT_TIMESTAMP  not null comment '最后更新时间',
-    editBy				bigint 						not null comment '最后编辑人',
-    createBy			bigint						not null comment '创建人',
-    updateBy 			bigint						not null comment '最后更新人',
+#     editBy				bigint 						not null comment '最后编辑人',
+#     createBy			bigint						not null comment '创建人',
+#     updateBy 			bigint						not null comment '最后更新人',
     removeFlag		TINYINT		default 0		not null comment '是否删除 0-否 1-是',
     UNIQUE KEY uk_userAccount(userAccount),
     INDEX idx_userName(userName)

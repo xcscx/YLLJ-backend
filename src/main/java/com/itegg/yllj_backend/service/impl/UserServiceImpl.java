@@ -1,7 +1,5 @@
 package com.itegg.yllj_backend.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -9,20 +7,28 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itegg.yllj_backend.exception.BusinessException;
 import com.itegg.yllj_backend.exception.ErrorCode;
+import com.itegg.yllj_backend.model.dto.user.UserLoginRequest;
 import com.itegg.yllj_backend.model.dto.user.UserRegisterRequest;
 import com.itegg.yllj_backend.model.entity.User;
 import com.itegg.yllj_backend.model.enums.UserRoleEnum;
+import com.itegg.yllj_backend.model.vo.LoginUserVO;
 import com.itegg.yllj_backend.service.UserService;
 import com.itegg.yllj_backend.mapper.UserMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 
+import static com.itegg.yllj_backend.constant.UserConstant.USER_LOGIN_STATE;
+
 /**
- *
+ * 用户 service层
  */
 @Service
+@Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Override
@@ -60,6 +66,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return user.getId();
     }
 
+    @Override
+    public LoginUserVO userLogin(UserLoginRequest req, HttpServletRequest request) {
+        // 校验参数是否合理
+        if(StrUtil.hasBlank(req.getUserAccount(), req.getUserPassword())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        // 加密密码
+        String encryptPassword = getEncryptPassword(req.getUserPassword());
+        // 查询用户是否存在
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userAccount", req.getUserAccount());
+        queryWrapper.eq("userPassword", encryptPassword);
+        User user = this.baseMapper.selectOne(queryWrapper);
+        if(ObjectUtil.isNull(user)) {
+            log.info("user login failed, userAccount cannot match userPassword");
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
+        }
+        // 记录用户的登录态
+        request.getSession().setAttribute(USER_LOGIN_STATE, user);
+        return this.getLoginUserVO(user);
+    }
 
     /**
      * 用户密码加密
@@ -68,9 +95,40 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public String getEncryptPassword(String userPassword) {
-    //TODO: 盐值转换为各个用户独有各自的盐值
+    // TODO: 盐值转换为各个用户独有各自的盐值
         final String SALT = "itegg";
         return DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+    }
+
+    /**
+     * 获取当前登录用户
+     * @param request http请求
+     * @return 用户信息
+     */
+    @Override
+    public User getLoginUser(HttpServletRequest request) {
+        // 判断是否登录
+        Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
+        User currentUser = (User) userObj;
+        if(ObjectUtil.isNull(currentUser) || ObjectUtil.isNull(currentUser.getId())) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        return currentUser;
+    }
+
+    /**
+     * 获取用户脱敏信息
+     * @param user 用户信息
+     * @return 用户脱敏信息
+     */
+    @Override
+    public LoginUserVO getLoginUserVO(User user) {
+        if(ObjectUtil.isNull(user)) {
+            return null;
+        }
+        LoginUserVO loginUserVO = new LoginUserVO();
+        BeanUtils.copyProperties(user, loginUserVO);
+        return loginUserVO;
     }
 
 }
