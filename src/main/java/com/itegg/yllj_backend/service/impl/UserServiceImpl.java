@@ -88,6 +88,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return this.getLoginUserVO(user);
     }
 
+    @Override
+    public boolean userLogout(HttpServletRequest request) {
+        Object userOjb = request.getSession().getAttribute(USER_LOGIN_STATE);
+        if(ObjectUtil.isNull(userOjb)) {
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "未登录");
+        }
+        // 移除登录态
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return true;
+    }
+
     /**
      * 用户密码加密
      * @param userPassword 用户明文密码

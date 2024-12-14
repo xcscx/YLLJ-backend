@@ -59,4 +59,14 @@ public class UserController {
         return ResultUtils.ok(userService.getLoginUserVO(user));
     }
 
+    /**
+     * 用户登出接口
+     * @param request http请求
+     * @return 是否成功登出
+     */
+    public Result<Boolean> userLogout(HttpServletRequest request) {
+        ThrowUtils.throwIf(ObjectUtil.isNull(request), ErrorCode.PARAMS_ERROR);
+        return ResultUtils.ok(userService.userLogout(request));
+    }
+
 }
