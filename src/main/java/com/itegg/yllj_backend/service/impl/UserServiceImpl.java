@@ -8,19 +8,26 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.itegg.yllj_backend.exception.BusinessException;
 import com.itegg.yllj_backend.exception.ErrorCode;
 import com.itegg.yllj_backend.model.dto.user.UserLoginRequest;
+import com.itegg.yllj_backend.model.dto.user.UserQueryRequest;
 import com.itegg.yllj_backend.model.dto.user.UserRegisterRequest;
 import com.itegg.yllj_backend.model.entity.User;
 import com.itegg.yllj_backend.model.enums.UserRoleEnum;
 import com.itegg.yllj_backend.model.vo.LoginUserVO;
+import com.itegg.yllj_backend.model.vo.UserVO;
 import com.itegg.yllj_backend.service.UserService;
 import com.itegg.yllj_backend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.swing.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.itegg.yllj_backend.constant.UserConstant.USER_LOGIN_STATE;
 
@@ -99,11 +106,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return true;
     }
 
-    /**
-     * 用户密码加密
-     * @param userPassword 用户明文密码
-     * @return 密文密码
-     */
     @Override
     public String getEncryptPassword(String userPassword) {
     // TODO: 盐值转换为各个用户独有各自的盐值
@@ -111,11 +113,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
     }
 
-    /**
-     * 获取当前登录用户
-     * @param request http请求
-     * @return 用户信息
-     */
     @Override
     public User getLoginUser(HttpServletRequest request) {
         // 判断是否登录
@@ -127,11 +124,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return currentUser;
     }
 
-    /**
-     * 获取用户脱敏信息
-     * @param user 用户信息
-     * @return 用户脱敏信息
-     */
     @Override
     public LoginUserVO getLoginUserVO(User user) {
         if(ObjectUtil.isNull(user)) {
@@ -140,6 +132,39 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LoginUserVO loginUserVO = new LoginUserVO();
         BeanUtils.copyProperties(user, loginUserVO);
         return loginUserVO;
+    }
+
+    @Override
+    public UserVO getUserVO(User user) {
+        if(ObjectUtil.isNull(user)) {
+            return null;
+        }
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
+    }
+
+    @Override
+    public List<UserVO> getUserVOList(List<User> userList) {
+        if(ObjectUtil.isNull(userList)) {
+            return new ArrayList<>();
+        }
+        return userList.stream().map(this::getUserVO).collect(Collectors.toList());
+    }
+
+    @Override
+    public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
+        if(ObjectUtil.isNull(userQueryRequest)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(ObjectUtil.isNotNull(userQueryRequest.getId()), "id", userQueryRequest.getId());
+        queryWrapper.eq(StrUtil.isNotBlank(userQueryRequest.getUserRole()), "userRole", userQueryRequest.getUserRole());
+        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserAccount()), "userAccount", userQueryRequest.getUserAccount());
+        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserName()), "userName", userQueryRequest.getUserName());
+        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserProfile()), "userProfile", userQueryRequest.getUserProfile());
+        queryWrapper.orderBy(StrUtil.isNotEmpty(userQueryRequest.getSortOrder()), userQueryRequest.getSortOrder().equals("asc"), userQueryRequest.getSortField());
+        return queryWrapper;
     }
 
 }

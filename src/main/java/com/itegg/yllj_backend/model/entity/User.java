@@ -71,17 +71,17 @@ public class User implements Serializable {
     /**
      * 最后编辑人
      */
-    private Long editBy;
+//    private Long editBy;
 
     /**
      * 创建人
      */
-    private Long createBy;
+//    private Long createBy;
 
     /**
      * 最后更新人
      */
-    private Long updateBy;
+//    private Long updateBy;
 
     /**
      * 是否删除 0-否 1-是
