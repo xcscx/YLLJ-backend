@@ -1,0 +1,48 @@
+package com.itegg.yllj_backend.model.dto.file;
+
+import lombok.Data;
+
+import java.util.Date;
+
+/**
+ * 上传图片的结果
+ */
+@Data
+public class UploadPictureResult {
+
+    /**
+     * 图片url
+     */
+    private String url;
+
+    /**
+     * 图片名称
+     */
+    private String name;
+
+    /**
+     * 图片体积
+     */
+    private Long picSize;
+
+    /**
+     * 图片宽度
+     */
+    private Integer picWidth;
+
+    /**
+     * 图片高度
+     */
+    private Integer picHeight;
+
+    /**
+     * 图片宽高比
+     */
+    private Double picScale;
+
+    /**
+     * 图片格式
+     */
+    private String picFormat;
+
+}
