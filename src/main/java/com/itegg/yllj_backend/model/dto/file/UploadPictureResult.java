@@ -2,7 +2,6 @@ package com.itegg.yllj_backend.model.dto.file;
 
 import lombok.Data;
 
-import java.util.Date;
 
 /**
  * 上传图片的结果
@@ -18,7 +17,7 @@ public class UploadPictureResult {
     /**
      * 图片名称
      */
-    private String name;
+    private String picName;
 
     /**
      * 图片体积
