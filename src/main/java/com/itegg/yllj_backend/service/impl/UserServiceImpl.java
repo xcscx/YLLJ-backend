@@ -167,6 +167,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return queryWrapper;
     }
 
+    @Override
+    public boolean isAdmin(User user) {
+        return ObjectUtil.isNotNull(user) && UserRoleEnum.ADMIN.getCode().equals(user.getUserRole());
+    }
+
 }
 
 
