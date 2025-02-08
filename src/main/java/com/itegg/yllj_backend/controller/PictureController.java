@@ -48,7 +48,7 @@ public class PictureController {
      * @param multipartFile 文件
      * @param pictureUploadRequest 图片请求
      * @param request http请求
-     * @return
+     * @return 上传的图片信息
      */
     @PostMapping("/upload")
     public Result<PictureVO> uploadPicture(@RequestPart("file")MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, HttpServletRequest request) {
