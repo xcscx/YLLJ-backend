@@ -11,12 +11,10 @@ import com.itegg.yllj_backend.constant.UserConstant;
 import com.itegg.yllj_backend.exception.BusinessException;
 import com.itegg.yllj_backend.exception.ErrorCode;
 import com.itegg.yllj_backend.exception.ThrowUtils;
-import com.itegg.yllj_backend.model.dto.picture.PictureEditRequest;
-import com.itegg.yllj_backend.model.dto.picture.PictureQueryRequest;
-import com.itegg.yllj_backend.model.dto.picture.PictureUpdateRequest;
-import com.itegg.yllj_backend.model.dto.picture.PictureUploadRequest;
+import com.itegg.yllj_backend.model.dto.picture.*;
 import com.itegg.yllj_backend.model.entity.Picture;
 import com.itegg.yllj_backend.model.entity.User;
+import com.itegg.yllj_backend.model.enums.PictureReviewStatusEnum;
 import com.itegg.yllj_backend.model.vo.PictureTagCategory;
 import com.itegg.yllj_backend.model.vo.PictureVO;
 import com.itegg.yllj_backend.service.PictureService;
@@ -64,7 +62,7 @@ public class PictureController {
      */
     @PostMapping("/update")
     @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
-    public Result<Boolean> updatePicture(@RequestBody PictureUpdateRequest pictureUpdateRequest) {
+    public Result<Boolean> updatePicture(@RequestBody PictureUpdateRequest pictureUpdateRequest, HttpServletRequest request) {
         if(ObjectUtil.isNull(pictureUpdateRequest) || pictureUpdateRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
@@ -79,6 +77,9 @@ public class PictureController {
         long id = pictureUpdateRequest.getId();
         Picture oldPicture = pictureService.getById(id);
         ThrowUtils.throwIf(ObjectUtil.isNull(oldPicture), ErrorCode.NOT_FOUND_ERROR);
+        // 补充审核参数
+        User loginUser = userService.getLoginUser(request);
+        pictureService.fillReviewParams(picture, loginUser);
         // 操作数据库
         boolean result = pictureService.updateById(picture);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
@@ -168,6 +169,8 @@ public class PictureController {
         long size = request.getPageSize();
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        // 限制普通用户只看已通过审核的数据
+        request.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
         // 查询数据库
         Page<Picture> picturePage = pictureService.page(new Page<>(current, size),
                 pictureService.getQueryWrapper(request));
@@ -195,6 +198,8 @@ public class PictureController {
         // 数据校验
         pictureService.validPicture(picture);
         User loginUser = userService.getLoginUser(request);
+        // 补充审核参数
+        pictureService.fillReviewParams(picture, loginUser);
         // 判断数据是否存在
         long id = pictureEditRequest.getId();
         Picture oldPicture = pictureService.getById(id);
@@ -210,6 +215,20 @@ public class PictureController {
         return ResultUtils.ok(true);
     }
 
+    /**
+     * 审核图片 - 仅管理员可用
+     * @param request 审核请求
+     * @param httpServletRequest http请求
+     * @return 是否成功审核
+     */
+    @PostMapping("/review")
+    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    public Result<Boolean> doPictureReview(@RequestBody PictureReviewRequest request, HttpServletRequest httpServletRequest) {
+        ThrowUtils.throwIf(ObjectUtil.isNull(request), ErrorCode.PARAMS_ERROR);
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        pictureService.doPictureReview(request, loginUser);
+        return ResultUtils.ok(true);
+    }
 
     /**
      * -----  项目启动  -----

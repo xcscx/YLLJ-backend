@@ -4,6 +4,7 @@ import com.itegg.yllj_backend.common.PageRequest;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -68,6 +69,26 @@ public class PictureQueryRequest extends PageRequest implements Serializable {
      * 搜素词 (名称，简介等)
      */
     private String searchText;
+
+    /**
+     * 审核状态: 0-待审核 1-通过 2-拒绝
+     */
+    private Integer reviewStatus;
+
+    /**
+     * 审核信息
+     */
+    private String reviewMessage;
+
+    /**
+     * 审核人 ID
+     */
+    private Long reviewerId;
+
+    /**
+     * 审核时间
+     */
+    private Date reviewTime;
 
     /**
      * 用户id
