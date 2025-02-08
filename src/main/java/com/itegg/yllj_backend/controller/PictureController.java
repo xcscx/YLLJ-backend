@@ -44,14 +44,13 @@ public class PictureController {
     private PictureService pictureService;
 
     /**
-     * 上传图片（兼容重新上唇）
+     * 上传图片（兼容重新上传）
      * @param multipartFile 文件
      * @param pictureUploadRequest 图片请求
      * @param request http请求
      * @return
      */
     @PostMapping("/upload")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Result<PictureVO> uploadPicture(@RequestPart("file")MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         PictureVO pictureVO = pictureService.uploadPicture(multipartFile, pictureUploadRequest, loginUser);
@@ -134,7 +133,6 @@ public class PictureController {
      * @return 图片脱敏信息
      */
     @GetMapping("/get/vo")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
     public Result<PictureVO> getPictureVOById(long id, HttpServletRequest request) {
         ThrowUtils.throwIf(id <= 0, ErrorCode.PARAMS_ERROR);
         // 查询数据

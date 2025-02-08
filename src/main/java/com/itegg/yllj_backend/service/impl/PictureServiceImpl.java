@@ -118,7 +118,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture>
     public Page<PictureVO> getPictureVOPage(Page<Picture> picturePage, HttpServletRequest request) {
         List<Picture> pictureList = picturePage.getRecords();
         Page<PictureVO> pictureVOPage = new Page<>(picturePage.getCurrent(), picturePage.getSize(), picturePage.getTotal());
-        if(CollUtil.isNotEmpty(pictureList)) {
+        if(CollUtil.isEmpty(pictureList)) {
             return pictureVOPage;
         }
         // 对象列表转换 -> 封装对象列表

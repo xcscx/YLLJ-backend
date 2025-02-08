@@ -2,7 +2,7 @@
 create database if not exists yllj_sql;
 
 -- 切换库
-use yllj_sql;
+use yllj-sql;
 
 -- 用户表
 create table if not exists user
